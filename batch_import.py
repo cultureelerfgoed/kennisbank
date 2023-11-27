@@ -42,6 +42,7 @@ print("Edit Token:", edit_token)
 #----------------------------------------
 # Met dit functie wordt de pagina in de juiste format geplaatst om geimporteerd te worden in de kennisbank.
 # Functie wordt hier geplaatst omdat het ervoor zorgt dat de volgende functie deze kan gebruiken om ieder afzonderlijk pagina te importeren.
+# Toevoegen van categorie aan begin van pagina. Hierdoor wordt de pagina in de gewenst categorie geplaatst.
 
 def fun_batch_import(page_name, page_text):
     edit_params = {
@@ -61,13 +62,13 @@ def fun_batch_import(page_name, page_text):
 #----------------------------------------
 #Functie om excel om te zetten naar de juiste format voor de kennisbank pagina.
 def xlsx_to_markup_kennisbank(df):
-    df['gezicht'] = df['gezicht'].astype(str)
+    df['paginanaam'] = df['paginanaam'].astype(str)
     df['trefwoord'] = df['trefwoord'].astype(str)
-    uniek_gezicht = df['gezicht'].unique()
-    
+    uniek_gezicht = df['paginanaam'].unique()
+
     # Loop over elk uniek gezicht
-    for gezicht in uniek_gezicht:
-        gezicht_df = df[df['gezicht'] == gezicht]   # Filter de DataFrame om alleen rijen met het huidige gezicht te krijgen
+    for paginanaam in uniek_gezicht:
+        gezicht_df = df[df['paginanaam'] == paginanaam]   # Filter de DataFrame om alleen rijen met het huidige gezicht te krijgen
         first_row = gezicht_df.iloc[0]    # Haal de gegevens van de eerste rij op (voor later gebruik)
 
         for _ , row in gezicht_df.iterrows():    # Loop over elke rij in het huidige gezicht
@@ -76,9 +77,9 @@ def xlsx_to_markup_kennisbank(df):
             f"{{{{#element:\n"
             f"|Elementtype={first_row['elementtype']}\n"    # let op spellingsfout in bron!
             f"|Status={first_row['status']}\n"
-            f"|Gezichtnummer={first_row['gezicht']}\n"
-            f"|Plaatsnaam={first_row['plaatsnaam']}\n"
-            f"|Naam gezicht={'' if ((pd.isna(first_row['naam_gezicht'])) | (first_row['naam_gezicht'] == 'nan')) else row['naam_gezicht']}\n"
+            f"|Gezichtnummer={first_row['gezichtnummer']}\n"
+            f"|Plaatsnaam={'' if ((pd.isna(first_row['plaatsnaam'])) | (first_row['plaatsnaam'] == 'nan')) else row['plaatsnaam']}\n"  # Leeg als geen plaatsnaam in zit
+            f"|Naam gezicht={'' if ((pd.isna(first_row['naam_gezicht'])) | (first_row['naam_gezicht'] == 'nan')) else row['naam_gezicht']}\n" # Mag nooit leeg zijn.
             f"|Provincie={first_row['provincie']}\n"
             f"|Kaart={first_row['kaart']}\n"
             f"|Omschrijving===Besluit==\n"
@@ -88,8 +89,8 @@ def xlsx_to_markup_kennisbank(df):
             f"|Trefwoord={' ' if ((pd.isna(first_row['trefwoord'])) | (first_row['trefwoord'] == 'nan')) else (first_row['trefwoord'])}\n"
             f"|Specialisten={first_row['specialisten']}\n"
             f"}}}}\n"
-            
-            # 1 - Besluit aanwijzing 
+
+            # 1 - Besluit aanwijzing
             f"{{{{SourceDocument\n"
             f"|Is onderdeel van={first_row['is_onderdeel_van_besluit']}\n"
             f"|Voorkeurslabel={first_row['voorkeurslabel_besluit']}\n"
@@ -125,14 +126,15 @@ def xlsx_to_markup_kennisbank(df):
                     f"|Bron text={row['bron_tekst_kaart']}\n"
                     f"}}}}\n"
                 )
-        
-        # Toevoegen van categorie aan begin van pagina. Hierdoor wordt de pagina in de gewenst categorie geplaatst.
-        category_text = "[[Categorie:Beschermde_stads-_en_dorpsgezichten]]"
-        formatted_text = category_text + formatted_text
-        edit_status = fun_batch_import(gezicht, formatted_text)
 
+        
+       
         # Import the page using fun_batch_import function
-        print(f"Edit Status voor Beschermde_stads-_en_dorpsgezicht {gezicht}: {edit_status}")
+        edit_status = fun_batch_import(paginanaam, formatted_text)
+
+        # Resultaat voor de user uitprinten.
+
+        print(f"Edit Status voor Beschermde_stads-_en_dorpsgezicht {paginanaam}: {edit_status}")
 
         # Sleep for 1 second
         time.sleep(1)
