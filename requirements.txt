@@ -19,4 +19,4 @@ setuptools==78.1.1
 six @ file:///tmp/build/80754af9/six_1644875935023/work
 tzdata @ file:///croot/python-tzdata_1690578112552/work
 urllib3 @ file:///work/perseverance-python-buildout/croot/urllib3_1698845837793/work
-wheel==0.41.2
+wheel==0.46.2
