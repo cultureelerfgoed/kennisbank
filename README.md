@@ -1,7 +1,5 @@
-# Kennisbank Rijksmonumenten:Python script voor batch import in kennisbank
-De kennisbank van de Rijksdienst voor het Cultureel Erfgoed wordt eind 2023 uitgebreid met ruim 2000 individuele kennispagina’s over Rijksmonumenten.
-# Kennisbank scripts
-Scripts die gebruikt worden om in bulk updates op de kennisbank door ter voeren. 
+# Kennisbank: Python scripts voor batch importeren, toevoegen of wijzigen
+Deze scripts worden voor de Kennisbank van de Rijksdienst voor het Cultureel Erfgoed gebruikt worden om in bulk updates door ter voeren. 
 
 ## Installatie
 
@@ -12,17 +10,17 @@ source .venv/Scripts/activate
 pip install -r requirements.txt
 ```
 
-## How to run 
+## Script lokaal uitvoeren 
 ```
 python src/batch_add_pages.py
 ```
 
-## How to run tests
+## Tests draaien
 ```
 python -m src/batch_update_wikitext_test.py
 ```
 
-## Run in Google Collabs
+## In Google Collabs
 
 Open in browser: https://colab.research.google.com/github/cultureelerfgoed/beheer-scripts-kennisbank/blob/main/src/batch_add_pages.ipynb
 
