@@ -4,6 +4,7 @@ import logging
 import requests
 from rdflib import Graph, Literal, URIRef
 from rdflib.namespace import RDF, SDO
+from _CEO import CEO
  
 GRAPH_ID = os.getenv('GRAPH_ID', 'default')
 OUTPUT_FILE_FORMAT = os.getenv('OUTPUT_FILE_FORMAT', 'json-ld')
@@ -12,7 +13,7 @@ SRC_URI = os.getenv('SRC_URI', 'https://kennis.cultureelerfgoed.nl/api.php')
 ENCODING = os.getenv('ENCODING', 'utf-8')
 
 KB_MO_QUERY = '[[Categorie:Monumenten]]|limit=2000|?Batch|?Status|?Monumentnummer|?Complex|?Plaatsnaam' \
-'|?Adres|?Naam monument|?Introductie|?Kenmerken|?Omschrijving|?Afbeelding (extern)|?Gerelateerd aan monument|?Gerelateerd aan artikel' \
+'|?Adres|?Naam monument|?Introductie|?Kenmerken|?Omschrijving|?Kennis|?Afbeelding (extern)|?Gerelateerd aan monument|?Gerelateerd aan artikel' \
 '|?Gerelateerd aan gezicht|?Gerelateerd aan thema'
 
 logger = logging.getLogger(__name__)
@@ -36,35 +37,41 @@ def parse_json_to_graph(mo_json: dict, graph_id: str) -> Graph:
     for result in mo_json['query']['results']:
         monument_properties = mo_json['query']['results'][result]['printouts']
         rm = URIRef(mo_json['query']['results'][result]['fullurl'])
-        graph.add((rm, RDF.type, SDO.LandmarksOrHistoricalBuildings))
+
         for mprop in monument_properties:
             if monument_properties[mprop]:
-                if 'Monumentnummer' in mprop:
-                    graph.add((rm, SDO.identifier, Literal(monument_properties[mprop][0])))
-                #elif 'Complex' in mprop[0]:
-                #    graph.add((rm, SDO.identifier, monument_properties[mprop][0]))
+                if 'Complex' in mprop and 'Nee' in monument_properties[mprop][0]:
+                    graph.add((rm, RDF.type, CEO.Rijksmonument))
+                elif 'Complex' in mprop and 'Ja' in monument_properties[mprop][0]:
+                    graph.add((rm, RDF.type, CEO.Complex))
+                elif 'Monumentnummer' in mprop:
+                    graph.add((rm, CEO.rijksmonumentnummer, Literal(monument_properties[mprop][0])))
+                elif 'Complex' in mprop and 'Nee' in monument_properties[mprop][0]:
+                    graph.add((rm, SDO.identifier, monument_properties[mprop][0]))
                 elif 'Plaatsnaam' in mprop:
                     graph.add((rm, SDO.containedInPlace, Literal(monument_properties[mprop][0], lang='nl')))
                 elif 'Adres' in mprop:
                     graph.add((rm, SDO.address, Literal(monument_properties[mprop][0])))
                 elif 'Naam monument' in mprop:
-                    graph.add((rm, SDO.name, Literal(monument_properties[mprop][0], lang='nl')))
+                    graph.add((rm, CEO.heeftNaam, Literal(monument_properties[mprop][0], lang='nl')))
                 elif 'Introductie' in mprop[0]:
                     graph.add((rm, SDO.disambiguatingDescription, Literal(monument_properties[mprop][0], lang='nl')))
                 elif 'Kenmerken' in mprop[0]:
-                    graph.add((rm, SDO.keywords, Literal(monument_properties[mprop][0], lang='nl')))
+                    graph.add((rm, CEO.heeftStijlEnCultuur, Literal(monument_properties[mprop][0], lang='nl')))
                 elif 'Omschrijving' in mprop:
-                    graph.add((rm, SDO.description, Literal(monument_properties[mprop][0], lang='nl')))
+                    graph.add((rm, CEO.heeftOmschrijving, Literal(monument_properties[mprop][0], lang='nl')))
                 elif 'Afbeelding (extern)' in mprop:
                     graph.add((rm, SDO.image, Literal(monument_properties[mprop][0], lang='nl')))
-                #elif 'Gerelateerd aan monument' in mprop[0]:
-                #    pass
-                #elif 'Gerelateerd aan artikel' in mprop[0]:
-                #    graph.add((rm, SDO.subjectOf, Literal(monument_properties[mprop][0], lang='nl')))
-                #elif 'Gerelateerd aan gezicht' in mprop[0]:
-                #    pass
-                #elif 'Gerelateerd aan thema' in mprop[0]:
-                #    pass
+                elif 'Gerelateerd aan monument' in mprop[0]:
+                    pass
+                elif 'Gerelateerd aan artikel' in mprop[0]:
+                    graph.add((rm, SDO.subjectOf, Literal(monument_properties[mprop][0], lang='nl')))
+                elif 'Gerelateerd aan gezicht' in mprop[0]:
+                    pass
+                elif 'Gerelateerd aan thema' in mprop[0]:
+                    pass
+                else:
+                    logger.info('Found uncaught field %s containing %s', mprop, monument_properties[mprop][0])
             
     return graph
 
