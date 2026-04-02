@@ -38,28 +38,40 @@ def parse_json_to_graph(mo_json: dict, graph_id: str) -> Graph:
         monument_properties = mo_json['query']['results'][result]['printouts']
         rm = URIRef(mo_json['query']['results'][result]['fullurl'])
 
+        # Adres, Afbeelding (extern), Afbeelding (intern), Introductie, Kenmerken, Monumentnummer, 
+        # Naam monument, Omschrijving, Plaatsnaam, Status, Trefwoord, Complex, Begrip, Batch, 
+        # Fase bescherming
+
         for mprop in monument_properties:
             if monument_properties[mprop]:
-                if 'Complex' in mprop and 'Nee' in monument_properties[mprop][0]:
-                    graph.add((rm, RDF.type, CEO.Rijksmonument))
-                elif 'Complex' in mprop and 'Ja' in monument_properties[mprop][0]:
-                    graph.add((rm, RDF.type, CEO.Complex))
-                elif 'Monumentnummer' in mprop:
-                    graph.add((rm, CEO.rijksmonumentnummer, Literal(monument_properties[mprop][0])))
-                elif 'Plaatsnaam' in mprop:
-                    graph.add((rm, CEO.heeftLocatieAanduiding, Literal(monument_properties[mprop][0], lang='nl')))
-                elif 'Adres' in mprop:
+                if 'Adres' in mprop:
                     graph.add((rm, SDO.address, Literal(monument_properties[mprop][0])))
-                elif 'Naam monument' in mprop:
-                    graph.add((rm, CEO.heeftNaam, Literal(monument_properties[mprop][0], lang='nl')))
+                elif 'Afbeelding (extern)' in mprop:
+                    graph.add((rm, SDO.image, Literal(monument_properties[mprop][0], lang='nl')))
+                elif 'Afbeelding (intern)' in mprop:
+                    graph.add((rm, SDO.image, Literal(monument_properties[mprop][0], lang='nl')))
                 elif 'Introductie' in mprop:
                     graph.add((rm, SDO.disambiguatingDescription, Literal(monument_properties[mprop][0], lang='nl')))
                 elif 'Kenmerken' in mprop:
                     graph.add((rm, CEO.heeftStijlEnCultuur, Literal(monument_properties[mprop][0], lang='nl')))
+                elif 'Monumentnummer' in mprop:
+                    graph.add((rm, CEO.rijksmonumentnummer, Literal(monument_properties[mprop][0])))
+                elif 'Naam monument' in mprop:
+                    graph.add((rm, CEO.heeftNaam, Literal(monument_properties[mprop][0], lang='nl')))
                 elif 'Omschrijving' in mprop:
                     graph.add((rm, CEO.heeftOmschrijving, Literal(monument_properties[mprop][0], lang='nl')))
-                elif 'Afbeelding (extern)' in mprop:
-                    graph.add((rm, SDO.image, Literal(monument_properties[mprop][0], lang='nl')))
+                elif 'Plaatsnaam' in mprop:
+                    graph.add((rm, CEO.heeftLocatieAanduiding, Literal(monument_properties[mprop][0], lang='nl')))
+                elif 'Trefwoord' in mprop:
+                    graph.add((rm, CEO.heeftTypekenmerk, Literal(monument_properties[mprop][0], lang='nl')))
+                elif 'Complex' in mprop and 'Nee' in monument_properties[mprop][0]:
+                    graph.add((rm, RDF.type, CEO.Rijksmonument))
+                elif 'Complex' in mprop and 'Ja' in monument_properties[mprop][0]:
+                    graph.add((rm, RDF.type, CEO.Complex))
+                elif 'Begrip' in mprop:
+                    graph.add((rm, CEO.heeftType, Literal(monument_properties[mprop][0])))
+                elif 'Fase bescherming' in mprop:
+                    graph.add((rm, CEO.heeftToestand, Literal(monument_properties[mprop][0])))
                 elif 'Gerelateerd aan monument' in mprop:
                     pass
                 elif 'Gerelateerd aan artikel' in mprop:
