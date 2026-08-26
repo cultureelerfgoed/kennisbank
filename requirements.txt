@@ -37,5 +37,5 @@ tornado==6.5.5
 traitlets==5.14.3
 typing==3.7.4.3
 tzdata==2025.3
-urllib3==2.6.3
+urllib3==2.7.0
 wcwidth==0.2.14
